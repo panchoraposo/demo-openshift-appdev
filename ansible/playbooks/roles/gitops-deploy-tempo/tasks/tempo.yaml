@@ -49,8 +49,8 @@
     obc_info.resources | length > 0 and
     obc_info.resources[0].status is defined and
     obc_info.resources[0].status.phase == 'Bound'
-   retries: 40
-   delay: 10
+  retries: 40
+  delay: 10
 
 - name: "TASK 3: Extract the name of the generated ConfigMap and Secret"
   ansible.builtin.set_fact:
