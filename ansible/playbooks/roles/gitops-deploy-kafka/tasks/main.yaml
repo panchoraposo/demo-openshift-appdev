@@ -1,0 +1,5 @@
+- name: Kafka Operator
+  include_tasks: kafka-operator.yaml
+
+- name: Kafka Cluster
+  include_tasks: kafka-cluster.yaml

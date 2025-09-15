@@ -1,0 +1,13 @@
+- hosts: localhost
+  gather_facts: false
+  vars_files:
+    - ../vars/demo.yaml
+  
+  roles:
+    - role: gitops-config
+    - role: gitops-deploy-devspaces
+    - role: gitops-deploy-knative
+    - role: gitops-deploy-otel
+    - role: gitops-deploy-odf
+    - role: gitops-deploy-quay
+    - role: gitops-deploy-kafka

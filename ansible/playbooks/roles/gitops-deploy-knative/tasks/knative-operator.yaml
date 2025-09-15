@@ -1,0 +1,15 @@
+---
+- name: "Create ArgoCD application to install the Knative Operator"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: knative-operator
+        namespace: openshift-gitops
+      spec:
+        project: default
+        source: { repoURL: "{{ gitops_repo }}", targetRevision: main, path: apps/knative-operator }
+        destination: { server: https://kubernetes.default.svc }
+        syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: [ "CreateNamespace=true" ] }

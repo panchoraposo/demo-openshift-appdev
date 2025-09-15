@@ -1,0 +1,76 @@
+---
+- name: Create openshift-gitops-operator namespace
+  k8s:
+    api_version: v1
+    kind: Namespace
+    name: openshift-gitops-operator
+    state: present
+
+- name: Render OperatorGroup and Subscription manifest
+  template:
+    src: templates/gitops-subscription.yaml.j2
+    dest: "{{ output_file }}"
+
+- name: Apply OperatorGroup and Subscription
+  kubernetes.core.k8s:
+    state: present
+    src: "{{ output_file }}"
+
+- name: Wait for GitOps Operator CSV to be succeeded
+  k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: openshift-gitops-operator
+  register: gitops_csvs
+  until: >
+    gitops_csvs.resources | selectattr('metadata.name', 'search', 'gitops') |
+    selectattr('status.phase', 'equalto', 'Succeeded') | list | length > 0
+  retries: 30
+  delay: 10
+
+- name: Wait for GitOps operator pod to be ready
+  shell: >
+    oc wait pod -n openshift-gitops-operator -l control-plane=gitops-operator --for=condition=Ready --timeout=120s
+  register: pod_wait_result
+  failed_when: pod_wait_result.rc != 0
+  changed_when: false
+
+- name: Wait for ArgoCD webhook service endpoints
+  shell: >
+    oc get endpoints openshift-gitops-operator-controller-manager-service -n openshift-gitops-operator -o jsonpath="{.subsets}"
+  register: webhook_endpoints
+  until: webhook_endpoints.stdout != ""
+  retries: 20
+  delay: 10
+
+- name: Create openshift-gitops namespace
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: openshift-gitops
+
+- name: Create ArgoCD instance in openshift-gitops
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: ArgoCD
+      metadata:
+        name: openshift-gitops
+        namespace: openshift-gitops
+
+- name: Wait for ArgoCD server deployment to be ready
+  kubernetes.core.k8s_info:
+    api_version: apps/v1
+    kind: Deployment
+    name: openshift-gitops-server
+    namespace: openshift-gitops
+  register: deployment_status
+  retries: 30
+  delay: 10
+  until: >
+    deployment_status.resources[0].status.readyReplicas is defined and
+    deployment_status.resources[0].status.readyReplicas > 0

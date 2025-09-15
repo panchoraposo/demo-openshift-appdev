@@ -1,0 +1,25 @@
+---
+- name: Create ArgoCD Applicatiob for DevSpaces instance
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: devspaces
+        namespace: openshift-gitops
+      spec:
+        project: default
+        source:
+          repoURL: "{{ gitops_repo }}"
+          targetRevision: main
+          path: apps/devspaces/overlays/dev
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: devspaces
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true

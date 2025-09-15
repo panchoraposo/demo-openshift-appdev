@@ -1,0 +1,5 @@
+- name: Knative Operator
+  include_tasks: knative-operator.yaml
+
+- name: Knative Instance
+  include_tasks: knative-instance.yaml

@@ -1,0 +1,56 @@
+---
+- name: Create ArgoCD application for DevSpaces Operator
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: devspaces-operator
+        namespace: openshift-gitops
+      spec:
+        project: default
+        source:
+          repoURL: "{{ gitops_repo }}"
+          targetRevision: main
+          path: apps/devspaces-operator/overlays/dev
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: devspaces
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
+
+- name: Wait for the successful installation of DevSpaces Operator CSV
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: devspaces
+    label_selectors:
+      - "operators.coreos.com/devspaces.devspaces"
+  register: csv_info
+  until: >
+    csv_info.resources is defined and
+    csv_info.resources | length > 0 and
+    (csv_info.resources[0].status.phase is defined and
+    csv_info.resources[0].status.phase == 'Succeeded')
+  retries: 30
+  delay: 10
+  changed_when: false
+
+- name: Wait for the DevSpaces webhook Service
+  kubernetes.core.k8s_info:
+    api_version: v1
+    kind: Service
+    name: devworkspace-webhookserver
+    namespace: devspaces
+  register: webhook_svc_info
+  until: webhook_svc_info.resources is defined and webhook_svc_info.resources | length > 0
+  retries: 30
+  delay: 10
+  changed_when: false
+
+

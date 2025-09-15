@@ -1,0 +1,105 @@
+---
+- name: "Create an ObjectBucketClaim"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: objectbucket.io/v1alpha1
+      kind: ObjectBucketClaim
+      metadata:
+        name: quay-s3-bucket-claim
+        namespace: "{{ quay_namespace }}"
+      spec:
+        storageClassName: openshift-storage.noobaa.io
+        bucketName: "{{ s3_quay_bucket_name }}"
+
+- name: "Wait for 'Bound' status"
+  kubernetes.core.k8s_info:
+    api_version: objectbucket.io/v1alpha1
+    kind: ObjectBucketClaim
+    name: quay-s3-bucket-claim
+    namespace: "{{ quay_namespace }}"
+  register: obc_info
+  until: >
+    obc_info.resources | length > 0 and
+    obc_info.resources[0].status is defined and
+    obc_info.resources[0].status.phase == 'Bound'
+  retries: 40
+  delay: 5
+
+- name: "Waiting to extract the S3 bucket details"
+  ansible.builtin.set_fact:
+    quay_s3_cm_name: "{{ obc_info.resources[0].spec.objectBucketName }}"
+    quay_s3_secret_name: "{{ obc_info.resources[0].spec.objectBucketName }}"
+
+- name: "Get S3 endpoint details from Quay ConfigMap"
+  kubernetes.core.k8s_info:
+    kind: ConfigMap
+    name: "{{ s3_quay_bucket_name }}"
+    namespace: "{{ quay_namespace }}"
+  register: ob_cm_info
+  until: "ob_cm_info.resources | length > 0"
+  retries: 20
+  delay: 5
+
+- name: "Get S3 credentials from Quay Secret"
+  kubernetes.core.k8s_info:
+    kind: Secret
+    name: "{{ s3_quay_bucket_name }}"
+    namespace: "{{ quay_namespace }}"
+  register: ob_secret_info
+  until: "ob_secret_info.resources | length > 0"
+  retries: 20
+  delay: 5
+
+- name: "Set vars with S3 data"
+  ansible.builtin.set_fact:
+    quay_s3_bucket_name: "{{ ob_cm_info.resources[0].data.BUCKET_NAME }}"
+    quay_s3_endpoint_url: "{{ ob_cm_info.resources[0].data.BUCKET_HOST }}"
+    quay_s3_access_key: "{{ ob_secret_info.resources[0].data.AWS_ACCESS_KEY_ID | b64decode }}"
+    quay_s3_secret_key: "{{ ob_secret_info.resources[0].data.AWS_SECRET_ACCESS_KEY | b64decode }}"
+
+- name: "Render Quay file 'config.yaml'"
+  ansible.builtin.template:
+    src: config.yaml.j2
+    dest: /tmp/quay-config.yaml
+
+- name: "Crear el Secret 'quay-config-bundle' con la configuración"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Secret
+      metadata:
+        name: quay-config-bundle
+        namespace: "{{ quay_namespace }}"
+      type: Opaque
+      stringData:
+        "config.yaml": "{{ lookup('file', '/tmp/quay-config.yaml') }}"
+
+- name: "Crear aplicación ArgoCD para la instancia de Quay"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata: { name: quay-instance, namespace: openshift-gitops }
+      spec:
+        project: default
+        source: { repoURL: "{{ gitops_repo }}", targetRevision: main, path: apps/quay-instance/overlays/dev }
+        destination: { server: https://kubernetes.default.svc }
+        syncPolicy: { automated: { prune: true, selfHeal: true } }
+
+- name: "Esperar a que la instancia de QuayRegistry esté lista"
+  kubernetes.core.k8s_info:
+    api_version: quay.redhat.com/v1
+    kind: QuayRegistry
+    name: quay
+    namespace: "{{ quay_namespace }}"
+  register: quay_status
+  until: >
+    quay_status.resources | length > 0 and
+    quay_status.resources[0].status.conditions is defined and
+    (quay_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | list | length > 0) and
+    (quay_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | list)[0].status == "True"
+  retries: 120
+  delay: 15

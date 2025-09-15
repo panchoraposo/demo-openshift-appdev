@@ -1,0 +1,13 @@
+# --- GitOps ---
+gitops_channel: latest
+gitops_repo: "https://github.com/panchoraposo/demo-openshift-appdev.git"
+output_file: /tmp/gitops-subscription.yaml
+gitops_repo_path: "/tmp/developer-hub"
+
+# --- ODF ---
+min_worker_nodes: 1
+
+# --- Quay ---
+quay_namespace: quay
+s3_quay_bucket_name: quay-s3-bucket-claim
+quay_host: quay-quay-quay.{{ openshift_base_domain }}

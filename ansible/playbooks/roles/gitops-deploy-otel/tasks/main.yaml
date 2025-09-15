@@ -1,0 +1,5 @@
+- name: Opentelemetry Operator
+  include_tasks: otel-operator.yaml
+
+- name: Opentelemetry Collector
+  include_tasks: otel-collector.yaml
