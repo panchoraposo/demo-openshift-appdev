@@ -4,11 +4,7 @@ metadata:
   name: dev
   namespace: observability
 spec:
-  config:
-    extensions:
-      bearertokenauth:
-        filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
-
+  config: |
     receivers:
       jaeger:
         protocols:
@@ -20,22 +16,30 @@ spec:
           http:
 
     processors:
+      batch: {}
 
     exporters:
-      debug: {}
       otlp:
         endpoint: tempo-simplest-gateway.observability.svc.cluster.local:8090
         tls:
           insecure: false
-          ca_file: "/var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt"
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         auth:
           authenticator: bearertokenauth
         headers:
           X-Scope-OrgID: "dev"
 
+    extensions:
+      bearertokenauth:
+        filename: /var/run/secrets/kubernetes.io/serviceaccount/token
+
     service:
       extensions: [bearertokenauth]
+      telemetry:
+        metrics:
+          address: 0.0.0.0:8888
       pipelines:
         traces:
-          receivers: [otlp, jaeger]
+          receivers: [jaeger, otlp]
+          processors: [batch]
           exporters: [otlp]
