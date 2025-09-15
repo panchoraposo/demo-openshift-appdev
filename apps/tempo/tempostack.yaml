@@ -1,16 +1,15 @@
 apiVersion: tempo.grafana.com/v1alpha1
 kind: TempoStack
 metadata:
-  name: tempo-simplest
+  name: tempo-main-instance
   namespace: observability
 spec:
   deploymentMode: allInOne
   storage:
     traces:
-      type: pvc
-      pvc:
-        storageClassName: openshift-storage.noobaa.io
-        size: 10Gi
+      type: object
+      object:
+        secretName: tempo-s3-credentials
   gateway:
     enabled: true
   template:

@@ -14,3 +14,6 @@ quay_host: quay-quay-quay.{{ openshift_base_domain }}
 
 # --- Tempo ---
 tempo_namespace: observability
+bucket_claim_name: "tempo-traces-bucket-claim"
+tempo_secret_name: "tempo-s3-credentials"
+storage_class_name: "openshift-storage.noobaa.io"
