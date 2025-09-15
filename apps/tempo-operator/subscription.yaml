@@ -1,10 +1,10 @@
 apiVersion: operators.coreos.com/v1alpha1
 kind: Subscription
 metadata:
-  name: tempo-operator
+  name: tempo-product
   namespace: observability
 spec:
-  channel: "stable"
+  channel: stable
   installPlanApproval: Automatic
   name: tempo-product
   source: redhat-operators
