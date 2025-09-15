@@ -1,6 +1,6 @@
 apiVersion: operators.coreos.com/v1
 kind: OperatorGroup
 metadata:
-  name: tempo-operatorgroup
-  namespace: openshift-operators
+  name: tempo-operatorgroup-rh
+  namespace: openshift-tempo-operator
 spec: {}
