@@ -88,18 +88,3 @@
         source: { repoURL: "{{ gitops_repo }}", targetRevision: main, path: apps/quay-instance/overlays/dev }
         destination: { server: https://kubernetes.default.svc }
         syncPolicy: { automated: { prune: true, selfHeal: true } }
-
-- name: "Esperar a que la instancia de QuayRegistry esté lista"
-  kubernetes.core.k8s_info:
-    api_version: quay.redhat.com/v1
-    kind: QuayRegistry
-    name: quay
-    namespace: "{{ quay_namespace }}"
-  register: quay_status
-  until: >
-    quay_status.resources | length > 0 and
-    quay_status.resources[0].status.conditions is defined and
-    (quay_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | list | length > 0) and
-    (quay_status.resources[0].status.conditions | selectattr('type', 'equalto', 'Available') | list)[0].status == "True"
-  retries: 120
-  delay: 15
