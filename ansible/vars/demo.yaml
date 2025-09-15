@@ -11,3 +11,6 @@ min_worker_nodes: 1
 quay_namespace: quay
 s3_quay_bucket_name: quay-s3-bucket-claim
 quay_host: quay-quay-quay.{{ openshift_base_domain }}
+
+# --- Tempo ---
+tempo_namespace: observability

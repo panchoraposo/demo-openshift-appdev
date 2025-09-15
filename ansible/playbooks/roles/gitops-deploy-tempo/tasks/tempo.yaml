@@ -1,0 +1,79 @@
+---
+- name: "Ensure Tempo namespace '{{ tempo_namespace }}' exists"
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ tempo_namespace }}"
+
+- name: "Create OperatorGroup for Red Hat Tempo"
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1
+      kind: OperatorGroup
+      metadata:
+        name: tempo-operatorgroup
+        namespace: "{{ tempo_namespace }}"
+      spec:
+        targetNamespaces:
+          - "{{ tempo_namespace }}"
+
+- name: "Subscribe to the Red Hat Tempo Operator"
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: operators.coreos.com/v1alpha1
+      kind: Subscription
+      metadata:
+        name: tempo-product
+        namespace: "{{ tempo_namespace }}"
+      spec:
+        channel: stable
+        name: tempo-product
+        source: redhat-operators
+        sourceNamespace: openshift-marketplace
+        installPlanApproval: Automatic
+
+- name: "Wait for Red Hat Tempo Operator to be ready"
+  kubernetes.core.k8s_info:
+    api_version: operators.coreos.com/v1alpha1
+    kind: ClusterServiceVersion
+    namespace: "{{ tempo_namespace }}"
+    label_selectors:
+      - "operators.coreos.com/tempo-product.{{ tempo_namespace }}="
+  register: csv_info
+  until: >
+    csv_info.resources | length > 0 and
+    csv_info.resources[0].status.phase == 'Succeeded'
+  retries: 40
+  delay: 20
+      
+- name: "Create ArgoCD Application for the Tempo instance"
+  community.kubernetes.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: tempo-instance
+        namespace: openshift-gitops
+        finalizers:
+          - resources-finalizer.argocd.argocd.argoproj.io
+      spec:
+        project: default
+        source:
+          repoURL: "{{ gitops_repo_url }}"
+          targetRevision: HEAD
+          path: "apps/tempo"
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: "{{ tempo_namespace }}"
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - CreateNamespace=true
