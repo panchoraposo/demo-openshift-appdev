@@ -1,24 +1,14 @@
-# 1. ClusterRole: Define el permiso para gestionar el CRD de CheCluster.
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argocd-checluster-crd-manager
-rules:
-  - apiGroups: ["apiextensions.k8s.io"]
-    resources: ["customresourcedefinitions"]
-    resourceNames: ["checlusters.org.eclipse.che"]
-    verbs: ["get", "list", "watch", "delete"]
 
----
 apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
+kind: RoleBinding
 metadata:
-  name: argocd-checluster-crd-manager-binding
+  name: argocd-application-controller-binding
+  namespace: devspaces
 subjects:
   - kind: ServiceAccount
     name: openshift-gitops-argocd-application-controller
     namespace: openshift-gitops
 roleRef:
   kind: ClusterRole
-  name: argocd-checluster-crd-manager
+  name: admin
   apiGroup: rbac.authorization.k8s.io
