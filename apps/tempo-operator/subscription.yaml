@@ -4,7 +4,7 @@ metadata:
   name: tempo-product
   namespace: observability
 spec:
-  channel: stable
+  channel: "stable-1.0"
   installPlanApproval: Automatic
   name: tempo-product
   source: redhat-operators
