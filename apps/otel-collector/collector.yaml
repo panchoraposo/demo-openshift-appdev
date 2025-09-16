@@ -1,8 +1,7 @@
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: test-collector
-  namespace: observability
+  name: dev-collector
 spec:
   config:
     receivers:
@@ -14,13 +13,10 @@ spec:
         protocols:
           grpc:
           http:
-
     processors:
       batch: {}
-
     exporters:
       debug: {}
-
     service:
       pipelines:
         traces:
