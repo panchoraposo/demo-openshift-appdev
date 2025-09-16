@@ -1,5 +1,6 @@
 resources:
-  - nooba.yaml
+  - rolebinding.yaml
+  #- nooba.yaml
   #- backingstore.yaml
   #- storage-system.yaml
-  - storage-cluster.yaml
+  #- storage-cluster.yaml
