@@ -91,7 +91,7 @@
         bucket: "{{ ob_cm_info.resources[0].data.BUCKET_NAME }}"
         endpoint: "{{ ob_cm_info.resources[0].data.BUCKET_HOST }}:{{ ob_cm_info.resources[0].data.BUCKET_PORT }}"
         access_key_id: "{{ ob_secret_info.resources[0].data.AWS_ACCESS_KEY_ID | b64decode }}"
-        secret_access_key: "{{ ob_secret_info.resources[0].data.AWS_SECRET_ACCESS_KEY | b64decode }}"
+        access_key_secret: "{{ ob_secret_info.resources[0].data.AWS_SECRET_ACCESS_KEY | b64decode }}"
 
 - name: "TASK 7: Create ArgoCD Application for the Tempo instance"
   kubernetes.core.k8s:
