@@ -10,6 +10,7 @@ spec:
       type: object
       object:
         secretName: tempo-s3-credentials
+        secretType: s3
   gateway:
     enabled: true
   template:
