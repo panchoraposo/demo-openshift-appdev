@@ -7,13 +7,9 @@ spec:
   config:
     receivers:
       jaeger:
-        protocols:
-          grpc:
-          thrift_http:
+        protocols: {}
       otlp:
-        protocols:
-          grpc:
-          http:
+        protocols: {}
 
     processors:
       batch: {}
