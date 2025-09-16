@@ -19,6 +19,7 @@ spec:
       batch: {}
 
     exporters:
+      debug: {}
       otlp:
         endpoint: tempo-simplest-gateway.observability.svc:4317
         tls:
