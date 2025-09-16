@@ -1,18 +1,27 @@
 apiVersion: tempo.grafana.com/v1alpha1
-kind: TempoStack
+kind:  TempoStack
 metadata:
-  name: tempo-main-instance
+  name: simplest
   namespace: observability
 spec:
-  deploymentMode: allInOne
   storage:
-    traces:
-      type: object
-      object:
-        secretName: tempo-s3-credentials
-        secretType: s3
-  gateway:
-    enabled: true
+    secret:
+      name: tempo-s3-credentials
+      type: s3
+  storageSize: 1Gi
+  resources:
+    total:
+      limits:
+        memory: 2Gi
+        cpu: 2000m
+  tenants:
+    mode: openshift
+    authentication:
+      - tenantName: dev
+        tenantId: "1610b0c3-c509-4592-a256-a1871353dbfa"
   template:
-    allInOne:
-      replicas: 1
+    gateway:
+      enabled: true
+    queryFrontend:
+      jaegerQuery:
+        enabled: true
