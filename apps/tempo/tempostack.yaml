@@ -1,19 +1,26 @@
 apiVersion: tempo.grafana.com/v1alpha1
-kind:  TempoStack
+kind: TempoStack
 metadata:
   name: simplest
   namespace: observability
 spec:
   storage:
-    secret:
-      name: tempo-s3-credentials
-      type: s3
+    traces:
+      type: object
+      object:
+        secretName: tempo-s3-credentials
+        secretType: s3
+
+        tls:
+          enabled: true
+
+          insecure: true
   storageSize: 1Gi
   resources:
     total:
       limits:
         memory: 2Gi
-        cpu: 2000m
+        cpu: "2000m"
   tenants:
     mode: openshift
     authentication:
