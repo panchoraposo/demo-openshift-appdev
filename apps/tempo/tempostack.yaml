@@ -10,7 +10,7 @@ spec:
       type: s3
     tls:
       enabled: true
-      insecure: true
+      caName: openshift-service-ca.crt
   storageSize: 1Gi
   resources:
     total:
