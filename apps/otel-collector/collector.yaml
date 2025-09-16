@@ -19,12 +19,11 @@ spec:
       batch: {}
 
     exporters:
-      logging:
-        loglevel: debug
+      debug: {}
 
     service:
       pipelines:
         traces:
           receivers: [jaeger, otlp]
           processors: [batch]
-          exporters: [logging]
+          exporters: [debug]
