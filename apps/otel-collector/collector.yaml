@@ -1,31 +1,30 @@
 apiVersion: opentelemetry.io/v1beta1
 kind: OpenTelemetryCollector
 metadata:
-  name: dev
+  name: test-collector
   namespace: observability
 spec:
   config:
     receivers:
       jaeger:
-        protocols: {}
+        protocols:
+          grpc:
+          thrift_http:
       otlp:
-        protocols: {}
+        protocols:
+          grpc:
+          http:
 
     processors:
       batch: {}
 
     exporters:
-      otlp:
-        endpoint: tempo-simplest-gateway.observability.svc.cluster.local:8090
-        tls:
-          insecure: true
+      logging:
+        loglevel: debug
 
     service:
-      telemetry:
-        metrics:
-          address: 0.0.0.0:8888
       pipelines:
         traces:
           receivers: [jaeger, otlp]
           processors: [batch]
-          exporters: [otlp]
+          exporters: [logging]
