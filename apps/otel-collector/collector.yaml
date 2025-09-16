@@ -19,11 +19,14 @@ spec:
       batch: {}
 
     exporters:
-      debug: {}
+      otlp:
+        endpoint: tempo-simplest-gateway.observability.svc:4317
+        tls:
+          insecure: true
 
     service:
       pipelines:
         traces:
           receivers: [jaeger, otlp]
           processors: [batch]
-          exporters: [debug]
+          exporters: [otlp]
