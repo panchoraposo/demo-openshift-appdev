@@ -60,7 +60,7 @@
 - name: "TASK 4: Get S3 endpoint details from the generated ConfigMap"
   kubernetes.core.k8s_info:
     kind: ConfigMap
-    name: "{{ generated_cm_secret_name }}"
+    name: "{{ bucket_claim_name }}"
     namespace: "{{ tempo_instance_namespace }}"
   register: ob_cm_info
   until: "ob_cm_info.resources | length > 0"
@@ -70,7 +70,7 @@
 - name: "TASK 5: Get S3 credentials from the generated Secret"
   kubernetes.core.k8s_info:
     kind: Secret
-    name: "{{ generated_cm_secret_name }}"
+    name: "{{ bucket_claim_name }}"
     namespace: "{{ tempo_instance_namespace }}"
   register: ob_secret_info
   until: "ob_secret_info.resources | length > 0"
@@ -105,9 +105,9 @@
       spec:
         project: default
         source:
-          repoURL: "{{ gitops_repo_url }}"
+          repoURL: "{{ gitops_repo }}"
           targetRevision: HEAD
-          path: "{{ gitops_repo_path }}"
+          path: "apps/tempo"
         destination:
           server: https://kubernetes.default.svc
           namespace: "{{ tempo_instance_namespace }}"

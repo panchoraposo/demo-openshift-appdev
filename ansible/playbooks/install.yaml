@@ -8,7 +8,7 @@
     #- role: gitops-deploy-devspaces
     - role: gitops-deploy-knative
     - role: gitops-deploy-otel
-    #- role: gitops-deploy-odf
+    - role: gitops-deploy-odf
     #- role: gitops-deploy-quay
     - role: gitops-deploy-kafka
     - role: gitops-deploy-tempo
