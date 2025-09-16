@@ -5,12 +5,26 @@ metadata:
   namespace: openshift-storage
 spec:
   manageNodes: false
+  monPVCTemplate:
+    spec:
+      storageClassName: gp3-csi
+      accessModes:
+      - ReadWriteOnce
+      resources:
+        requests:
+          storage: 10Gi
   storageDeviceSets:
   - name: ocs-deviceset-sno
     count: 1
     replica: 1
-    resources: {}
-    placement: {}
+    placement:
+      tolerations:
+      - key: "node-role.kubernetes.io/master"
+        operator: "Exists"
+        effect: "NoSchedule"
+      - key: "node-role.kubernetes.io/control-plane"
+        operator: "Exists"
+        effect: "NoSchedule"
     dataPVCTemplate:
       spec:
         storageClassName: gp3-csi
