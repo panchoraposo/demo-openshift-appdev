@@ -8,16 +8,19 @@ spec:
     receivers:
       jaeger:
         protocols:
-          grpc:
-          thrift_http:
+          grpc: {}
+          thrift_http: {}
       otlp:
         protocols:
-          grpc:
-          http:
+          grpc: {}
+          http: {}
+
     processors:
       batch: {}
+
     exporters:
       debug: {}
+
     service:
       pipelines:
         traces:
