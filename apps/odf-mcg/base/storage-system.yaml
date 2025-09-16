@@ -5,6 +5,7 @@ metadata:
     - storagesystem.odf.openshift.io
   name: ocs-storagecluster-storagesystem
   namespace: openshift-storage
+  uid: be651c42-5dff-4af2-98b0-86373d419271
 spec:
   kind: storagecluster.ocs.openshift.io/v1
   name: ocs-storagecluster

@@ -1,38 +1,57 @@
 apiVersion: ocs.openshift.io/v1
 kind: StorageCluster
 metadata:
-  name: ocs-storagecluster
-  namespace: openshift-storage
   annotations:
-    ocs.openshift.io/on-single-node: "true"
+    uninstall.ocs.openshift.io/cleanup-policy: delete
+    uninstall.ocs.openshift.io/mode: graceful
+  name: ocs-storagecluster
+  uid: 2ba15c0b-8bee-4b2f-9c25-8e4ac3ff1bd1
+  namespace: openshift-storage
+  ownerReferences:
+    - apiVersion: odf.openshift.io/v1alpha1
+      kind: StorageSystem
+      name: ocs-storagecluster-storagesystem
+      uid: be651c42-5dff-4af2-98b0-86373d419271
+  finalizers:
+    - storagecluster.ocs.openshift.io
 spec:
-  manageNodes: false
-  monPVCTemplate:
-    spec:
-      storageClassName: gp3-csi
-      accessModes:
-      - ReadWriteOnce
-      resources:
-        requests:
-          storage: 10Gi
-  storageDeviceSets:
-  - name: ocs-deviceset-sno
-    count: 1
-    replica: 1
-    placement:
-      tolerations:
-      - key: "node-role.kubernetes.io/master"
-        operator: "Exists"
-        effect: "NoSchedule"
-      - key: "node-role.kubernetes.io/control-plane"
-        operator: "Exists"
-        effect: "NoSchedule"
-    dataPVCTemplate:
-      spec:
-        storageClassName: gp3-csi
-        accessModes:
-        - ReadWriteOnce
-        volumeMode: Block
-        resources:
-          requests:
-            storage: 250Gi
+  arbiter: {}
+  encryption:
+    keyRotation:
+      schedule: '@weekly'
+    kms: {}
+  externalStorage: {}
+  managedResources:
+    cephObjectStoreUsers: {}
+    cephCluster: {}
+    cephBlockPools: {}
+    cephNonResilientPools:
+      count: 1
+      resources: {}
+      volumeClaimTemplate:
+        metadata: {}
+        spec:
+          resources: {}
+        status: {}
+    cephObjectStores: {}
+    cephFilesystems:
+      dataPoolSpec:
+        application: ''
+        erasureCoded:
+          codingChunks: 0
+          dataChunks: 0
+        mirroring: {}
+        quotas: {}
+        replicated:
+          size: 0
+        statusCheck:
+          mirror: {}
+    cephRBDMirror:
+      daemonCount: 1
+    cephToolbox: {}
+    cephDashboard: {}
+    cephConfig: {}
+  multiCloudGateway:
+    dbStorageClassName: gp3-csi
+    reconcileStrategy: standalone
+  resourceProfile: balanced
