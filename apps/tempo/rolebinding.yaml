@@ -1,46 +1,13 @@
 apiVersion: rbac.authorization.k8s.io/v1
-kind: Role
-metadata:
-  name: argocd-tempostack-manager
-  namespace: observability
-rules:
-- apiGroups: ["tempo.grafana.com"]
-  resources: ["tempostacks"]
-  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
----
-apiVersion: rbac.authorization.k8s.io/v1
 kind: RoleBinding
 metadata:
-  name: argocd-tempostack-manager-binding
+  name: argocd-application-controller-binding
   namespace: observability
 subjects:
-- kind: ServiceAccount
-  name: openshift-gitops-argocd-application-controller
-  namespace: openshift-gitops
-roleRef:
-  kind: Role
-  name: argocd-tempostack-manager
-  apiGroup: rbac.authorization.k8s.io
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRole
-metadata:
-  name: argocd-tokenreview-creator
-rules:
-- apiGroups: ["authentication.k8s.io"]
-  resources: ["tokenreviews"]
-  verbs: ["create"]
-
----
-apiVersion: rbac.authorization.k8s.io/v1
-kind: ClusterRoleBinding
-metadata:
-  name: argocd-tokenreview-creator-binding
-subjects:
-- kind: ServiceAccount
-  name: openshift-gitops-argocd-application-controller
-  namespace: openshift-gitops
+  - kind: ServiceAccount
+    name: openshift-gitops-argocd-application-controller
+    namespace: openshift-gitops
 roleRef:
   kind: ClusterRole
-  name: argocd-tokenreview-creator
+  name: admin
   apiGroup: rbac.authorization.k8s.io

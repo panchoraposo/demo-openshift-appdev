@@ -1,7 +1,3 @@
-# Reemplaza el RoleBinding inseguro con esto.
-# Esto crea un rol específico y luego lo asigna.
-
-# 1. Role: Define los permisos mínimos y necesarios para Argo CD en el namespace "observability".
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
 metadata:
