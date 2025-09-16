@@ -3,3 +3,5 @@ kind: NooBaa
 metadata:
   name: noobaa
   namespace: openshift-storage
+  annotations:
+    noobaa.io/cleanup-policy: delete
