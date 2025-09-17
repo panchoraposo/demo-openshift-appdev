@@ -25,7 +25,7 @@ spec:
       otlp:
         endpoint: tempo-simplest-distributor.observability.svc:4317
         tls:
-          insecure: true
+          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
         auth:
           authenticator: bearertokenauth
         headers:
