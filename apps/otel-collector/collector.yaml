@@ -5,9 +5,6 @@ metadata:
   namespace: observability
 spec:
   config:
-    extensions:
-      bearertokenauth:
-        filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
     receivers:
       jaeger:
         protocols:
@@ -22,14 +19,7 @@ spec:
     exporters:
       otlp:
         endpoint: tempo-simplest-distributor.observability.svc:4317
-        #tls:
-        #  ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
-        auth:
-          authenticator: bearertokenauth
-        headers:
-          X-Scope-OrgID: "dev"
     service:
-      extensions: [bearertokenauth]
       pipelines:
         traces:
           receivers: [otlp, jaeger]
