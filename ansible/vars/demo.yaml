@@ -1,6 +1,7 @@
 # --- GitOps ---
 gitops_channel: latest
 gitops_repo: "https://github.com/panchoraposo/demo-openshift-appdev.git"
+gitops_repo_apps: "https://github.com/panchoraposo/demo-camel-saga.git"
 output_file: /tmp/gitops-subscription.yaml
 gitops_repo_path: "/tmp/developer-hub"
 
@@ -17,3 +18,15 @@ tempo_instance_namespace: observability
 bucket_claim_name: "tempo-traces-bucket-claim"
 tempo_secret_name: "tempo-s3-credentials"
 storage_class_name: "openshift-storage.noobaa.io"
+
+# --- Apps ---
+order_app_namespace: order
+payment_app_namespace: payment
+allocation_app_namespace: allocation
+frontend_app_namespace: frontend
+db_pod_label: "app=orders"
+db_name: "orders"
+db_user: "quarkus"
+insert_sql_script: "INSERT INTO user_table (username, email, budget) VALUES ('johndoe', 'johndoe@example.com', 100.50),('janedoe', 'janedoe@example.com', 200.75),('alice', 'alice@example.com', 150.00),('bob', 'bob@example.com', 300.25);"
+db_admin_user: "postgres"
+grant_sql_script: "ALTER ROLE quarkus WITH LOGIN; GRANT ALL PRIVILEGES ON TABLE user_table TO quarkus; GRANT ALL PRIVILEGES ON TABLE order_table TO quarkus;"

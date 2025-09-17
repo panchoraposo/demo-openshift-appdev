@@ -1,0 +1,11 @@
+- name: Order application
+  include_tasks: app-order.yaml
+
+- name: Payment application
+  include_tasks: app-payment.yaml
+
+- name: Allocation application
+  include_tasks: app-allocation.yaml
+
+- name: Frontend application
+  include_tasks: app-frontend.yaml

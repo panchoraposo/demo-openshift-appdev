@@ -1,0 +1,27 @@
+---
+- name: "Ensure the '{{ frontend_app_namespace }}' namespace exists"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ frontend_app_namespace }}"
+        labels:
+          argocd.argoproj.io/managed-by: ansible
+
+- name: "Create ArgoCD application for Frontend Application"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: app-frontend
+        namespace: openshift-gitops
+      spec:
+        project: default
+        source: { repoURL: "{{ gitops_repo_apps }}", targetRevision: main, path: apps/frontend/overlays/dev }
+        destination: { server: https://kubernetes.default.svc }
+        syncPolicy: { automated: { prune: true, selfHeal: true } }
+

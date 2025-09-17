@@ -1,0 +1,27 @@
+---
+- name: "Ensure the '{{ order_app_namespace }}' namespace exists"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: v1
+      kind: Namespace
+      metadata:
+        name: "{{ order_app_namespace }}"
+        labels:
+          argocd.argoproj.io/managed-by: ansible
+
+- name: "Create ArgoCD application for Order Application"
+  kubernetes.core.k8s:
+    state: present
+    definition:
+      apiVersion: argoproj.io/v1alpha1
+      kind: Application
+      metadata:
+        name: app-order
+        namespace: openshift-gitops
+      spec:
+        project: default
+        source: { repoURL: "{{ gitops_repo_apps }}", targetRevision: main, path: apps/order/overlays/dev }
+        destination: { server: https://kubernetes.default.svc }
+        syncPolicy: { automated: { prune: true, selfHeal: true } }
+

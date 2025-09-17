@@ -10,9 +10,19 @@
         namespace: openshift-gitops
       spec:
         project: default
-        source: { repoURL: "{{ gitops_repo }}", targetRevision: main, path: apps/tempo-operator }
-        destination: { server: https://kubernetes.default.svc }
-        syncPolicy: { automated: { prune: true, selfHeal: true }, syncOptions: [ "CreateNamespace=true" ] }
+        source:
+          repoURL: "{{ gitops_repo }}"
+          targetRevision: main
+          path: apps/tempo-operator
+        destination:
+          server: https://kubernetes.default.svc
+          namespace: "openshift-tempo-operator"
+        syncPolicy:
+          automated:
+            prune: true
+            selfHeal: true
+          syncOptions:
+            - "CreateNamespace=true"
 
 - name: "Wait for Red Hat Tempo Operator to be ready"
   kubernetes.core.k8s_info:
@@ -39,7 +49,7 @@
         storageClassName: openshift-storage.noobaa.io
         bucketName: "{{ bucket_claim_name }}"
 
-- name: "TASK 2: Wait for the ObjectBucketClaim to be 'Bound'"
+- name: "Wait for the ObjectBucketClaim to be 'Bound'"
   kubernetes.core.k8s_info:
     api_version: objectbucket.io/v1alpha1
     kind: ObjectBucketClaim
@@ -53,11 +63,7 @@
   retries: 40
   delay: 10
 
-- name: "TASK 3: Extract the name of the generated ConfigMap and Secret"
-  ansible.builtin.set_fact:
-    generated_cm_secret_name: "{{ obc_info.resources[0].spec.objectBucketName }}"
-
-- name: "TASK 4: Get S3 endpoint details from the generated ConfigMap"
+- name: "Get S3 endpoint details from the generated ConfigMap"
   kubernetes.core.k8s_info:
     kind: ConfigMap
     name: "{{ bucket_claim_name }}"
@@ -67,7 +73,7 @@
   retries: 20
   delay: 5
 
-- name: "TASK 5: Get S3 credentials from the generated Secret"
+- name: "Get S3 credentials from the generated Secret"
   kubernetes.core.k8s_info:
     kind: Secret
     name: "{{ bucket_claim_name }}"
@@ -77,7 +83,7 @@
   retries: 20
   delay: 5
 
-- name: "TASK 6: Create the final Secret in the format required by TempoStack"
+- name: "Create the final Secret in the format required by TempoStack"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -89,11 +95,12 @@
       type: Opaque
       stringData:
         bucket: "{{ ob_cm_info.resources[0].data.BUCKET_NAME }}"
-        endpoint: "{{ ob_cm_info.resources[0].data.BUCKET_HOST }}:{{ ob_cm_info.resources[0].data.BUCKET_PORT }}"
+        endpoint: "https://{{ ob_cm_info.resources[0].data.BUCKET_HOST }}:{{ ob_cm_info.resources[0].data.BUCKET_PORT }}"
         access_key_id: "{{ ob_secret_info.resources[0].data.AWS_ACCESS_KEY_ID | b64decode }}"
         access_key_secret: "{{ ob_secret_info.resources[0].data.AWS_SECRET_ACCESS_KEY | b64decode }}"
+        insecure: "true"
 
-- name: "TASK 7: Create ArgoCD Application for the Tempo instance"
+- name: "Create ArgoCD Application for the Tempo instance"
   kubernetes.core.k8s:
     state: present
     definition:
@@ -111,8 +118,14 @@
         destination:
           server: https://kubernetes.default.svc
           namespace: "{{ tempo_instance_namespace }}"
+        ignoreDifferences:
+        - group: tempo.grafana.com
+          kind: TempoStack
+          jsonPointers:
+          - /status
         syncPolicy:
           automated:
             prune: true
             selfHeal: true
           syncOptions:
+            - CreateNamespace=true
