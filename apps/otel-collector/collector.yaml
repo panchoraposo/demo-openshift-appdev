@@ -8,7 +8,6 @@ spec:
     extensions:
       bearertokenauth:
         filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
-
     receivers:
       jaeger:
         protocols:
@@ -20,20 +19,17 @@ spec:
         protocols:
           grpc: {}
           http: {}
-
     processors:
       batch: {}
-
     exporters:
       otlp:
         endpoint: tempo-simplest-distributor.observability.svc:4317
         tls:
-          ca_file: /var/run/secrets/kubernetes.io/serviceaccount/service-ca.crt
+          insecure: true
         auth:
           authenticator: bearertokenauth
         headers:
           X-Scope-OrgID: "dev"
-
     service:
       extensions: [bearertokenauth]
       pipelines:
