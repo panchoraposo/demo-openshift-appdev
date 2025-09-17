@@ -8,12 +8,18 @@ spec:
     secret:
       name: tempo-s3-credentials
       type: s3
-  template:
-    distributor:
-      tls:
-        enabled: false
-    gateway:
+    tls:
       enabled: true
+      caName: openshift-service-ca.crt
+  storageSize: 1Gi
+  resources:
+    total:
+      limits:
+        memory: 2Gi
+        cpu: "2000m"
+  template:
+    gateway:
+      enabled: false
     queryFrontend:
       jaegerQuery:
         enabled: true
