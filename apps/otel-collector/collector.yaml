@@ -19,7 +19,6 @@ spec:
       batch: {}
 
     exporters:
-      debug: {}
       otlp:
         endpoint: tempo-simplest-distributor.observability.svc.cluster.local:4317
         tls:
@@ -30,4 +29,4 @@ spec:
         traces:
           receivers: [jaeger, otlp]
           processors: [batch]
-          exporters: [debug, otlp]
+          exporters: [otlp]
