@@ -21,7 +21,7 @@ spec:
     exporters:
       debug: {}
       otlp:
-        endpoint: tempo-simplest-gateway.observability.svc.cluster.local:8090
+        endpoint: tempo-simplest-distributor.observability.svc.cluster.local:4317
         tls:
           insecure: true
 
