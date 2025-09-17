@@ -10,21 +10,21 @@ spec:
         filename: "/var/run/secrets/kubernetes.io/serviceaccount/token"
 
     receivers:
-      otlp:
-        protocols:
-          grpc:
-          http:
       jaeger:
         protocols:
-          thrift_binary:
-          thrift_compact:
-          thrift_http:
-          grpc:
+          grpc: {}
+          thrift_binary: {}
+          thrift_compact: {}
+          thrift_http: {}
+      otlp:
+        protocols:
+          grpc: {}
+          http: {}
 
     processors:
+      batch: {}
 
     exporters:
-      debug: {}
       otlp:
         endpoint: tempo-simplest-distributor.observability.svc:4317
         tls:
@@ -39,4 +39,5 @@ spec:
       pipelines:
         traces:
           receivers: [otlp, jaeger]
+          processors: [batch]
           exporters: [otlp]
